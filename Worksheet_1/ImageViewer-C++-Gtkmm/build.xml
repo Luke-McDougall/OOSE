@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="imageviewer-gtk" basedir="." default="clean-build">
+    <property name="src.dir"       value="src"/>
+    <property name="resources.dir" value="resources"/>
+    <property name="build.dir"     value="build"/>
+    <property name="dist.dir"      value="dist"/>
+    <property name="compiler"      value="g++"/>
+    <property environment="env"/>
+    
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+    <target name="configure">
+        <echo>Finding and running pkg-config...</echo>
+        
+        <property name="pkgconfig.fail.msg" value="This could mean that: (a) gtkmm 3.0 (and its corresponding '-devel' package) are not installed properly, or (b) your PATH is incorrectly setup." />
+        
+        <available property="pkgconfig.exists" file="pkg-config" filepath="${env.PATH}" />
+        <fail unless="pkgconfig.exists" message="Could not find 'pkg-config'. ${pkgconfig.fail.msg}" />
+        
+        <exec executable="pkg-config" resultproperty="pkgconfig.result1" outputproperty="cflags">
+            <arg line="--cflags gtkmm-3.0" />
+        </exec>        
+        <echo>Compile flags:</echo>
+        <echo>${cflags}</echo>
+        
+        <exec executable="pkg-config" resultproperty="pkgconfig.result2" outputproperty="lflags">
+            <arg line="--libs gtkmm-3.0"/>
+        </exec>
+        <echo>Link flags:</echo>
+        <echo>${lflags}</echo>
+        
+        <fail message="'pkg-config' failed. ${pkgconfig.fail.msg}">
+            <condition>
+                <or>
+                    <isfailure code="${pkgconfig.result1}" />
+                    <isfailure code="${pkgconfig.result2}" />
+                </or>
+            </condition>
+        </fail>        
+    </target>
+    
+    <target name="compile" depends="configure">
+        <mkdir dir="${build.dir}"/>
+        <echo>Compiling...</echo>
+        <apply executable="${compiler}" failonerror="true" dest="${build.dir}" parallel="false" verbose="true">
+            <arg value="-c"/>
+            <arg value="-g"/>
+            <arg value="-std=c++11"/>
+            <arg line="${cflags}"/>
+            <arg value="-o"/>
+            <targetfile/>
+            <srcfile/>
+            <fileset dir="${src.dir}" includes="*.cpp"/>
+            <mapper type="glob" from="*.cpp" to="*.o"/>
+        </apply>
+    </target>
+    
+    <target name="link" depends="compile,configure">
+        <mkdir dir="${dist.dir}"/>
+        <echo>Linking...</echo>
+        <apply executable="${compiler}" failonerror="true" parallel="true" verbose="true">
+            <arg line="${lflags}"/>
+            <arg value="-o"/>
+            <arg value="${dist.dir}/${ant.project.name}"/>
+            <fileset dir="${build.dir}" includes="*.o"/>
+        </apply>
+        <copy todir="${dist.dir}">
+            <fileset dir="${resources.dir}"/>
+        </copy>
+        <echo>You can find the compiled program in the ${dist.dir}/ directory.</echo>
+    </target>
+
+    <target name="clean-build" depends="clean,link"/>
+</project>
