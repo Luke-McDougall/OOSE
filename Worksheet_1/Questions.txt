@@ -1,0 +1,19 @@
+1. Discussion: Multiplicity
+a) No, those methods would make more sense for the City class. 
+
+b) A getTotalPopulation() method that returns the sum of the populations of each city.
+   A getCity(String name) method, an addCity(City new_city) method.
+
+c) getTotalPopulation() and getCity() would be the same because you have to iterate over
+   the collection to sum the populations or check the passed string against the name of each
+   city respectively. addCity() would be different with a set because with a list you'd have
+   to iterate over all the elements to make sure you aren't adding a city that is already there
+   but set can't have duplicate elements so you'd just add the city to the set and if it works
+   the new city isn't a duplicate.
+
+2. Discussion: Maps and Multiplicity
+a) getProperty(Address addr), getAddress(Property property), 
+   addProperty(Address addr, Property property), removeProperty(Address addr)
+
+b) Because the address is used as the key in the map you would have to remove the entry in the
+   map with that address and add it again with the updated address.
