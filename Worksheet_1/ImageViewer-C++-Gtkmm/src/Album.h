@@ -14,18 +14,18 @@ class Album
         Album();
         ~Album();
         // *** Insert your declarations here. ***
-        void add_image(Image *img);
+        void add_image(Image img);
         void init_iterator();
-        Image *get_image();
+        Image get_image();
         void next_image();
         void prev_image();
         
     private:
         // *** Insert your declarations here. ***
-        std::vector<Image*> images;
-        std::vector<Image*>::iterator current;
-        std::vector<Image*>::iterator first;
-        std::vector<Image*>::iterator last;
+        std::vector<Image> images;
+        std::vector<Image>::iterator current;
+        std::vector<Image>::iterator first;
+        std::vector<Image>::iterator last;
 };
 
 #endif

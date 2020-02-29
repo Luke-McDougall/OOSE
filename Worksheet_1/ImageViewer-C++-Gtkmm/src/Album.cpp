@@ -3,17 +3,16 @@
 Album::Album() 
 {
     // *** Insert initialisation code here (if needed) ***
-    images = std::vector<Image*>();
+    images = std::vector<Image>();
 }
 
 Album::~Album()
 {
     // *** Insert destructor code here (if needed) ***
-    images.~vector();
 }
 
 // *** Insert your method definitions here for Album ***
-void Album::add_image(Image *img)
+void Album::add_image(Image img)
 {
     images.push_back(img);
 }
@@ -25,7 +24,7 @@ void Album::init_iterator()
     current = first;
 }
 
-Image *Album::get_image()
+Image Album::get_image()
 {
     return *current;
 }

@@ -23,8 +23,8 @@ MainWindow::MainWindow(Album* newAlbum) :
     set_default_size(400, 400);
 
     // *** Fix this code so that it loads the initial (first) image. ***
-    Image *first_img = album->get_image();
-    imageWidget.set(first_img->getFilename().c_str());
+    Image first_img = album->get_image();
+    imageWidget.set(first_img.getFilename().c_str());
         
     // Add 'mainBox' to the window. This is a container for holding the other bits: the toolbar, 
     // scroller (containing the image), and caption.
@@ -47,7 +47,7 @@ MainWindow::MainWindow(Album* newAlbum) :
     // the window, we would normally consider Gtk::Statusbar instead, but Label is simpler.)
     mainBox.pack_start(captionWidget, Gtk::PACK_SHRINK);
     // *** Fix this code so that it displays the caption for the first image. ***
-    captionWidget.set_text(first_img->getCaption().c_str());
+    captionWidget.set_text(first_img.getCaption().c_str());
     
     // Tell all widgets to display themselves.
     show_all();
@@ -76,9 +76,9 @@ void MainWindow::prevBtnHandler()
 {
     // *** Fix this code so that it actually displays the previous image & caption. ***
     album->prev_image();
-    Image *img = album->get_image();
-    imageWidget.set(img->getFilename().c_str());
-    captionWidget.set_text(img->getCaption().c_str());
+    Image img = album->get_image();
+    imageWidget.set(img.getFilename().c_str());
+    captionWidget.set_text(img.getCaption().c_str());
 }
 
 /**
@@ -88,8 +88,8 @@ void MainWindow::nextBtnHandler()
 {
     // *** Fix this code so that it actually displays the next image & caption. ***
     album->next_image();
-    Image *img = album->get_image();
-    imageWidget.set(img->getFilename().c_str());
-    captionWidget.set_text(img->getCaption().c_str());
+    Image img = album->get_image();
+    imageWidget.set(img.getFilename().c_str());
+    captionWidget.set_text(img.getCaption().c_str());
 }
 

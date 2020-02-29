@@ -65,7 +65,7 @@ bool readAlbumFile(std::string albumFilename, Album* album)
         if(imageFilename.size() > 0)
         {
             // *** Insert your code here to add a new image to the album. ***
-            Image *img = new Image(imageFilename, imageCaption);
+            Image img = Image(imageFilename, imageCaption);
             album->add_image(img);
         }
     }
