@@ -8,32 +8,24 @@ import java.util.*;
 public class AddressBook
 {
     // Two maps so that you can search for an entry by name or by email
-    private HashMap<String, Entry> names;
-    private HashMap<String, Entry> emails;
+    private Map<String, Entry> names;
+    private Map<String, Entry> emails;
 
     public AddressBook()
     {
-        names = null;
-        emails = null;
+        names = new HashMap<String, Entry>();
+        emails = new HashMap<String, Entry>();
     }
 
     // Add an entry to the names map
     public void add_name_entry(String name, Entry new_entry)
     {
-        if(names == null)
-        {
-            names = new HashMap<String, Entry>();
-        }
         names.put(name, new_entry);
     }
 
     // Add an entry to the emails map
     public void add_email_entry(String email, Entry new_entry)
     {
-        if(emails == null)
-        {
-            emails = new HashMap<String, Entry>();
-        }
         emails.put(email, new_entry);
     }
 
