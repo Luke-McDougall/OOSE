@@ -21,7 +21,7 @@ class Album
         void prev_image();
         
     private:
-        // *** Insert your declarations here. ***
+        // all fields are value objects and will be freed when Album is freed.
         std::vector<Image> images;
         std::vector<Image>::iterator current;
         std::vector<Image>::iterator first;

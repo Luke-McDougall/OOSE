@@ -52,12 +52,16 @@ public class AddressBookApp
 
             Entry entry = new Entry();
             entry.set_name(parts[0]);
+             
+            // Add all email addresses to the Entry
             for(int i = 1; i < parts.length; i++)
             {
                 entry.add_email(parts[i]);
             }
 
             addressBook.add_name_entry(parts[0], entry);
+
+            // Add the entry to the emails map for each email in the entry
             for(int i = 1; i < parts.length; i++)
             {
                 addressBook.add_email_entry(parts[i], entry);
@@ -93,15 +97,34 @@ public class AddressBookApp
                         String name = input.nextLine();
                         
                         // Insert your code here to find an entry by name and display it.
-                        System.out.print(addressBook.get_entry_by_name(name).toString());
+                        Entry name_entry = addressBook.get_entry_by_name(name);
+
+                        if(name_entry != null)
+                        {
+                            System.out.print(name_entry.toString());
+                        }
+                        else
+                        {
+                            System.out.println("No entry for that name exists.");
+                        }
                         break;
                         
                     case 2:
                         System.out.print("Enter email address: ");
                         String email = input.nextLine();
-                        
+
                         // Insert your code here to find an entry by email and display it.
-                        System.out.print(addressBook.get_entry_by_email(email).toString());
+                        Entry email_entry = addressBook.get_entry_by_email(email);
+
+                        if(email_entry != null)
+                        {
+                            System.out.print(email_entry.toString());
+                        }
+                        else
+                        {
+                            System.out.println("No entry for that email exists.");
+                        }
+                        
                         break;
                         
                     case 3:

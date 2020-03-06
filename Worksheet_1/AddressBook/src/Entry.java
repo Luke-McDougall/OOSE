@@ -8,6 +8,7 @@ import java.util.*;
 public class Entry 
 {
     private String name;
+    // HashSet is used because there should not be any duplicate email addresses
     private HashSet<String> email_addresses;
 
     public Entry()
