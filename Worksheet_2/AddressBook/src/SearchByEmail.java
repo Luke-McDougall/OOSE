@@ -1,3 +1,6 @@
+/* *
+ * Luke McDougall
+ */
 public class SearchByEmail implements Option
 {
     private AddressBook book;
