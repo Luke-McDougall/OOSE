@@ -18,7 +18,7 @@ public class AddressBookApp
         
         System.out.print("Enter address book filename: ");
         fileName = input.nextLine();
-	AddressBookApp app = new AddressBookApp();
+        AddressBookApp app = new AddressBookApp();
         
         try
         {
@@ -39,18 +39,18 @@ public class AddressBookApp
 
     public AddressBookApp()
     {
-	options = new HashMap<Integer, Option>();
-	addressBook = null;
+        options = new HashMap<Integer, Option>();
+        addressBook = null;
     }
 
     public void add_option(int key, Option opt)
     {
-	options.put(key, opt);
+        options.put(key, opt);
     }
 
     public AddressBook get_address_book()
     {
-	return addressBook;
+        return addressBook;
     }
     
     /**
@@ -92,7 +92,7 @@ public class AddressBookApp
         }
         reader.close();
         
-	this.addressBook = addressBook;
+	    this.addressBook = addressBook;
     }
     
     /**
@@ -121,12 +121,12 @@ public class AddressBookApp
                     Option opt = options.get(choice);
                     if(opt != null)
                     {
-			String query = null;
-			if(opt.needs_input())
-			{
-			    System.out.print("Enter search query: ");
-			    query = input.nextLine();
-			}
+                        String query = null;
+                        if(opt.needs_input())
+                        {
+                            System.out.print("Enter search query: ");
+                            query = input.nextLine();
+                        }
                         System.out.println(opt.do_option(query));
                     }
                 }

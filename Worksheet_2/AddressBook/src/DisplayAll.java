@@ -4,21 +4,21 @@ public class DisplayAll implements Option
 
     DisplayAll(AddressBook book)
     {
-	this.book = book;
+        this.book = book;
     }
 
     public boolean needs_input()
     {
-	return false;
+        return false;
     }
 
     public String do_option(String query) // Query should always be null for this subclass
     {
-	String result = new String();
-	for(Entry e : book.get_entries())
-	{
-	    result += e.toString();
-	}
-	return result;
+        String result = new String();
+        for(Entry e : book.get_entries())
+        {
+            result += e.toString();
+        }
+        return result;
     }
 }

@@ -46,6 +46,6 @@ public class AddressBook
 
     public Collection<Entry> get_entries()
     {
-	return names.values();
+        return names.values();
     }
 }

@@ -12,7 +12,7 @@ public class SearchByEmail implements Option
 
     public boolean needs_input()
     {
-	return true;
+        return true;
     }
     
     public String do_option(String query)
