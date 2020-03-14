@@ -1,0 +1,37 @@
+#+TITLE: Lecture 3: Separation of Concerns and Error Handling
+#+AUTHOR: Luke McDougall
+* Encapsulation
+** Separation of Concerns
+   - A design ideal - implies low coupling and high cohesion.
+   - A "concern" can be virtually any aspect of the system's
+     functionality.
+   - As much as possible different concerns should be handled by
+     different sections of code.
+   - Makes it easier for the human brain to process!
+** Encapsulation
+   - Encapsulation is how separation of concerns is achieved in OO.
+   - A class represents a "concern" and hence some aspect of the
+     system's functionality.
+   - A class has:
+     - A *public interface*: all the publicly visible method and
+       constructor signatures, and any public constants.
+     - An *implementation*: all the private fields/methods and the
+       code itself.
+     - (You could say it also has a "protected interface", visible to
+       any subclasses).
+   - Classes communicate via there public interfaces only.
+     - The word "interface" is overloaded a bit.
+     - Think of java interfaces as a kind of class that /only/ has a
+       public interface, and no implementation.
+** Access Modifiers
+   - Java, C++ and other languages use access modifiers:
+     - public :: accessible everywhere.
+     - proteceted :: accessible to subclasses only.
+     - private :: accessible within this class only.
+** An Interesting Example
+#+BEGIN_SRC Java
+#+END_SRC
+* Architectural Separation
+* Packages and Namespaces
+* Nested Classes
+* Exceptions
