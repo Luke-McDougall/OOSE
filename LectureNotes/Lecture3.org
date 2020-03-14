@@ -29,9 +29,62 @@
      - proteceted :: accessible to subclasses only.
      - private :: accessible within this class only.
 ** An Interesting Example
-#+BEGIN_SRC Java
-#+END_SRC
+   #+BEGIN_SRC java
+     public class Point
+     {
+         private int x;
+         private int y;
+
+         public void add(Point other)
+         {
+             x += other.x;  // But other.x is private...
+             y += other.y;
+         }
+     }
+   #+END_SRC
+   - Right? Wrong? Will it compile?
+   - (Same behaviour in Java and C++).
+** What does private really mean?
+   - Access modifiers (~public~, ~protected~ and ~private~) apply to classes
+     not objects.
+     - If a field/method ~private~, other classes cannot access it.
+     - Other /objects/ of the same class /can/!
+   - Access modifiers help enforce low class coupling.
+     - High coupling exists if classes interfere with the inner
+       workings of other classes.
+     - This reduces readability, maintainability, and will increase
+       the risk of creating faults.
+   - Coupling between /individual/ objects is meaningless - they don't
+     have their own code.
+     - Two objects of the same class are described by the /same code/.
+     - That class must access it's own private fields anyway.
 * Architectural Separation
+  - A few SE patterns are large-scale, "architectural" patterns
+    - Especially for GUI/web/mobile programs.
+  - They govern the overall structure of the software.
+  - Some examples:
+    - Model-View-Controller (MVC)
+    - Model-View-Presenter (MVP)
+    - Model-View-Adapter (MVA)
+    - Model-View-ViewModel (MVVM)
+  - They all divide a software system into:
+    - The "model" - the classes that store the information.
+    - The "view" - the user interface.
+    - The leftover bit.
+** The model
+   - The model represents real-world concepts that the system deals with.
+   - The model stores information.
+     - Classes in the model often have simple accessors and mutators.
+     - But the model may also load/save itself.
+       - If there's a database, the model connects to it.
+   - For example, in a class registration system:
+     - Class, with subclasses Lecture and Practical.
+     - Student.
+     - Venue.
+     - Unit.
+     - ClassInfoLoader.
+** The View
+   
 * Packages and Namespaces
 * Nested Classes
 * Exceptions
