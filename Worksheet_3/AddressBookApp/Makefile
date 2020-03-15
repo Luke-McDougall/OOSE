@@ -1,14 +1,32 @@
 CC=javac
-CP=~/OOSE/Worksheet_3/AddressBookApp/addressbook
+CP=~/OOSE/Worksheet_3/AddressBookApp
 
-$(CP)/model/Entry.class: $(CP)/model/Entry.java
-	$(CC) $(CP)/model/Entry.java
+$(CP)/addressbook/model/Entry.class: $(CP)/addressbook/model/Entry.java
+	$(CC) $(CP)/addressbook/model/Entry.java
 
-$(CP)/model/AddressBook.class: $(CP)/model/AddressBook.java $(CP)/model/Entry.class
-	$(CC) $(CP)/model/AddressBook.java
+$(CP)/addressbook/model/AddressBook.class: $(CP)/addressbook/model/AddressBook.java $(CP)/addressbook/model/Entry.class
+	$(CC) $(CP)/addressbook/model/AddressBook.java
 
-$(CP)/controller/Option.class: $(CP)/controller/Option.java $(CP)/model/AddressBook.class
-	$(CC) $(CP)/controller/Option.java
+$(CP)/addressbook/controller/Option.class: $(CP)/addressbook/controller/Option.java $(CP)/addressbook/model/AddressBook.class
+	$(CC) $(CP)/addressbook/controller/Option.java
 
-build: $(CP)/controller/Option.class
-	$(CC) $(CP)/controller/SearchByName.java $(CP)/controller/SearchByEmail.java $(CP)/controller/DisplayAll.java
+$(CP)/addressbook/controller/SearchByName.class: $(CP)/addressbook/controller/Option.class
+	$(CC) $(CP)/addressbook/controller/SearchByName.java
+
+$(CP)/addressbook/controller/SearchByEmail.class: $(CP)/addressbook/controller/Option.class
+	$(CC) $(CP)/addressbook/controller/SearchByEmail.java
+
+$(CP)/addressbook/controller/DisplayAll.class: $(CP)/addressbook/controller/Option.class
+	$(CC) $(CP)/addressbook/controller/DisplayAll.java
+
+$(CP)/addressbook/view/LoadDataException.class: $(CP)/addressbook/controller/DisplayAll.class $(CP)/addressbook/controller/SearchByEmail.class $(CP)/addressbook/controller/SearchByName.class
+	$(CC) -cp $(CP) $(CP)/addressbook/view/LoadDataException.java
+
+$(CP)/addressbook/view/AddressBookUI.class: $(CP)/addressbook/controller/DisplayAll.class $(CP)/addressbook/controller/SearchByEmail.class $(CP)/addressbook/controller/SearchByName.class
+	$(CC) -cp $(CP) $(CP)/addressbook/view/AddressBookUI.java
+
+$(CP)/addressbook/controller/AddressBookController.class: $(CP)/addressbook/view/AddressBookUI.class
+	$(CC) $(CP)/addressbook/controller/AddressBookController.java
+
+build: $(CP)/addressbook/controller/AddressBookController.class 
+	$(CC) -cp $(CP) AddressBookApp.java

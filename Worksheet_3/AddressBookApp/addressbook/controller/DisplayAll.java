@@ -6,7 +6,12 @@ public class DisplayAll implements Option
 {
     private AddressBook book;
 
-    DisplayAll(AddressBook book)
+    DisplayAll()
+    {
+        book = null;
+    }
+
+    public void set_address_book(AddressBook book)
     {
         this.book = book;
     }

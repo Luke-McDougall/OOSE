@@ -6,9 +6,13 @@ import addressbook.model.*;
 public class SearchByName implements Option
 {
     private AddressBook book;
-    private Scanner input;
 
-    SearchByName(AddressBook book)
+    SearchByName()
+    {
+        book = null;
+    }
+
+    public void set_address_book(AddressBook book)
     {
         this.book = book;
     }

@@ -6,7 +6,12 @@ public class SearchByEmail implements Option
 {
     private AddressBook book;
 
-    SearchByEmail(AddressBook book)
+    SearchByEmail()
+    {
+        book = null;
+    }
+
+    public void set_address_book(AddressBook book)
     {
         this.book = book;
     }
