@@ -84,7 +84,549 @@
      - Unit.
      - ClassInfoLoader.
 ** The View
-   
+   - Also called the user interface (UI).
+   - Basically handles user input/output.
+   - The UI/View can be radically different depending on the type of
+     software you're making:
+     - Console-based programs often take all their input "up-front" on
+       the command line.
+     - Desktop and mobile apps have a back-and-forth user interaction.
+     - Web applications need to transmit and receive UI information
+       across the internet.
+     - A lot of software has no real UI at all.
+** The Leftover Bit
+   - Not everything is part of the View or Model.
+   - There's also the decision-making/business-logic part (i.e. the
+     brains).
+   - We often call this the "controller".
+     - You may have several controllers, one related to each part of
+       the UI.
+   - This might be split up in other ways too.
+     - If the app is not driven by user interaction,
+       "model-view-controller" is /not/ a good way to think about it.
+** Architectural Separation of Concerns
+   - Don't mix up the responsibilities of the model and the view.
+   - Tempting but very bad to:
+     - Store authoritative information in the user interface.
+     - Input/output information from within the model.
+   - This is the old "cohesion" thing.
+     - Methods and classes should perform one well defined task.
+     - So to should large scale parts of the system.
+   - You might need to work on one part only (e.g. just the UI).
+     - Much simpler if it's highly cohesive.
+** View-Model Interaction
+   - The View and the Model must exchange information.
+     - The View must have something to output.
+     - The model's data must ultimately come from the user.
+   - Each architectural pattern does this differently.
+   - The View and Model should have /very low/ coupling.
 * Packages and Namespaces
+  - UML, Java, C++ and Python all allow grouping of classes.
+  - UML, Java, and Python support "packages".
+  - C++ supports namespaces.
+  - The concepts have substantial overlap.
+** Packages in UML
+   - Classes/interfaces drawn inside a package box belong to that
+     package.
+   - You can have packages inside packages too.
+   - Packages don't affect relationships between classes/interfaces.
+** Packages in UML (Alternate Notation)
+   - Alternatively, use "" (the circle-plus notation) to indicate
+     things inside packages.
+   - This is probably worse! More lines and less visual grouping.
+   - Another use for this symbol.
+** C++ Namespaces
+   - Classes can be declared inside a namespace like this:
+     #+BEGIN_SRC C++
+       namespace Model
+       {
+           class ShoppingCart
+           {
+               ...
+           };
+       };
+     #+END_SRC
+   - The full name is now ~Model::ShoppingCart~.
+   - In the .cpp file, write ~Model::ShoppingCart::addProduct(...)~ for
+     each method.
+** C++ Namespace Members
+   - One namespace can contain multiple classes, as well as functions
+     and even /other namespaces/.
+   - However, everything is public.
+   - You can define parts of a namespace in different places:
+     #+BEGIN_SRC C++
+       namespace Model
+       {
+           class ShoppingCart { ... };
+       };
+       ...
+       namespace Model // Perhaps in another file
+       {
+           class Product { ... };
+           Product *findProduct(std::string name);
+       };
+     #+END_SRC
+     ~Model~ contains ~ShoppingCart~, ~Product~ and ~findProduct~.
+** C++: Importing from Namespaces
+   - You can always write ~Model::Product~ to access a class inside a
+     namespace.
+     #+BEGIN_SRC C++
+       Model::Product product("cup");  // Creates an object.
+     #+END_SRC
+   - But you can also write:
+     #+BEGIN_SRC C++
+       using Model::Product;
+       ...
+       Product product("cup");   // Same as above
+     #+END_SRC
+     - If you use product a lot, this can make things neater.
+     - But /only/ do this in .cpp files, not header files.
+   - You may also sometimes see this:
+     #+BEGIN_SRC C++
+       using namespace std;    // Lazy programmer.
+     #+END_SRC
+     - A /bad idea/. Lots of strangely-named stuff in std, and naming
+       conflicts may result in very strange bugs.
+** Java Packages
+   - Java packages are /sort-of/ hierarchical.
+     - They /look/ hierarchical.
+     - They're /stored/ hierarchically in directories.
+     - But, at the language level, packages do not contain other
+       packages - Java treats them all separately.
+   - Standard API packages include java.io, java.util, etc.
+   - There is a naming convention for all other packages.
+     - They start with your website domain name, in reverse order.
+     - e.g. if you own =https://mysite.org=, your package names should
+       start with =org.mysite=.
+     - Then, for an application, you might have a series of packages
+       as follows:
+       - =org.mysite.retailapp= - the main package.
+       - =org.mysite.retailapp.ui=;
+       - =org.mysite.retailapp.controller=;
+       - etc.
+** Java Packages: Files and Directories
+   - Each Java class is stored as a .class file.
+   - Each Java package is stored as a directory containing .class
+     files.
+     - Each part of the package name maps onto a subdirectory.
+     - e.g. for the package =org.mysite.retailapp=, class files will
+       be located in the directory =org/mysite/retailapp/=.
+     - But where is the top-level "org" directory located?
+   - Conventionally, .java and .class files are located in separate
+     places.
+   - The CLASSPATH indicates where to find the /top-level/ classes and
+     packages:
+     =/home/user/projects/= ~org/mysite.retailapp/Xyz.class~
+     =CLASSPATH=            ~Package Directory~
+** Java Packages in Code
+   - Inside your source code, you also need a ~package~ declaration.
+   - Say class MyWindow is inside the package =org.mysite.myapp.ui=.
+   - You must have:
+     #+BEGIN_SRC java
+       package org.mysite.myapp.ui;  // Before imports
+
+       import somepackage.SomeClass;
+
+       public class MyWindow
+       {
+           ...
+       }
+     #+END_SRC
+   - This is on top of keeping =MyWindow.java= inside the directory
+     =org/mysite/myapp/ui/=.
+** Using Java Packages
+   - Java's "import" is comparable to C++'s "using".
+   - We /could/ write this:
+     #+BEGIN_SRC java
+       org.mysite.myapp.App obj = new org.mysite.myapp.App();
+     #+END_SRC
+   - But we prefer to write this:
+     #+BEGIN_SRC java
+       import org.mysite.myapp.App;
+       ...
+       App obj = new App();  // Same as above
+     #+END_SRC
+   - We can also write ~import org.mysite.myapp.*;~
+     - Imports everything from the package.
+     - Similar to C++'s "using namespace", but not as bad in Java,
+       because...
+     - Java is simpler - harder for spooky naming-conflicts to
+       happen.
+     - Java's API is divided up into much more fine-grained packages.
+   - import is not recursive. ~import java.*;~ has no effect.
+** Package Encapsulation
+   - Java can enforce encapsulation on a package level; e.g.
+     #+BEGIN_SRC java
+       public class Product { ... }
+       class Product { ... }         // Package-private class
+     #+END_SRC
+     - A public class can be accessed outside it's package.
+     - A non-public class cannot; it is "package private".
+   - Contents of classes can also be made package-private.
+     - This is the default if you omit public, protected or private.
+  #+BEGIN_SRC java
+    public class MyClass
+    {
+        private int x;
+        MyClass() { ... }           // Package-private constructor
+        void setX(int newX) { ... } // Package-private method
+        public int getX() { ... }        
+    }
+  #+END_SRC
+** Higher-level Encapsulation
+   - Like individual classes, larger-scale parts of the software have
+     a public interface and private implementation.
+   - The public interface consists of all the classes intended to be
+     used by the outside world.
+   - The implementation is everything else - all the private or
+     package-private classes, constructors, methods and fields.
+   - This applies to the model, the view and the controller, and to
+     any other ways of breaking up the software.
+   - Encapsulation works at several levels at once:
+     - Package-private classes still have an interface and
+       implementation.
+     - Their internal workings are still protected from the rest of
+       the package.
+   - The very largest components - e.g. the view - may consist of
+     several entire packages. Some may be purely implementation.
 * Nested Classes
+  - Supported by Java, C++, Python and others, but use sparingly.
+  - Very occasionally, one class may form a natural part of another.
+    - We're /not/ talking about "is-a" or "has-a" relationships.
+  - When this happens, you can define one class /inside/ another.
+  - The nested class may:
+    - Participate in a complex part of the parent class's
+      implementation, and/or
+    - Help the parent class interact with other classes.
+  - Overuse may violate encapsulation, and lead to excessively large
+    files.
+** Nested Classes: UML
+   The circle-plus notation again
+   Outer ----- + Nested
+   ----------- - Nested2
+   
+   - Here, Nested and Nested2 are defined within the Outer class.
+     - Nested is public, while Nested2 is private.
+     - They can still do anything a normal class does.
+   - Bending the UML specification a bit...
+     - Technically, this notation is defined for
+       things-in-/packages/.
+     - But it seems logical to use it for things-in-classes too.
+   - Relatively rare in practice.
+     - It /is/ useful to describe certain OOSE concepts.
+     - But nested classes can be a fairly low-level detail (once you
+       understand them!).
+** Nested Classes: C++
+   - In C++, nested classes behave a bit like classes inside
+     namespaces, excepts:
+     - The nested class can be private or protected.
+     - You can't avoid using the parent class's name ("using
+       namespace" won't work on class names).
+     #+BEGIN_SRC C++
+       class Outer
+       {
+       public:
+           class Nested { ... };
+       private:
+           class Nested2 { ... };
+           ...
+       };
+     #+END_SRC
+   - Instead of a private nested class, you could define a separate
+     class inside the .cpp file.
+   - The C++ containers (~vector~, ~list~, ~map~, ~set~, etc) each
+     have a nested class called ~iterator~.
+   - This declares an iterator for iterating over a vector of MyClass
+     pointers:
+     #+BEGIN_SRC C++
+       std::vector<MyClass*>::iterator it;
+     #+END_SRC
+** Nested Classes: Java
+   #+BEGIN_SRC java
+     public class Outer
+     {
+         public static class Nested { ... };
+         private static class Nested2 { ... };
+         ...
+     }
+   #+END_SRC
+   - This works more-or-less like in C++.
+   - Interfaces and classes can also be nested inside each other.
+   - Use ~static~ (as above) to get normal nested class.
+   - Remove ~static~ to get an /inner class/.
+     - Outside of Java, "inner class" = "nested class".
+     - In Java, inner classes are a special kind of nested class.
+     - Each inner class /instance/ (not just the class itself) is
+       linked to an outer class instance.
+     - An implicit association between the inner and outer classes.
+** Nested Classes: Java - Example from the API
+   - ~java.util.Map~ (an interface) contains a /nested interface/
+     called ~Map.Entry~.
+   - Used to iterate over both keys and values in the map at the same
+     time:
+     #+BEGIN_SRC java
+       for(Map.Entry entry : theMap.entrySet())
+       {
+           System.out.println(
+               entry.getKey() + "->" + entry.getValue());
+       }
+     #+END_SRC
+   - The nested class ~AbstractMap.SimpleEntry~ implements the nested
+     interface ~Map.Entry~.
 * Exceptions
+  - Exceptions are interruptions to the normal flow control.
+    - Designed mostly for error handling.
+    - Exceptions can break out of an algorithm when something goes
+      wrong.
+    - Why not ~if~ statements? Exceptions are often simpler - fewer
+      boolean conditions and scopes.
+  - Instances of the ~Exception~ class represent exceptions.
+    - Java, C++, and Python all have this standard class.
+    - However, in each language there are different subclasses.
+    - Different kinds of exceptions can occur.
+** Creating an Exception
+   Exceptions occur when:
+   - You execute a ~throw~ statement (or ~raise~ in Python):
+     #+BEGIN_SRC java
+       throw new MyExceptionType();
+     #+END_SRC
+   - You execute an expression with invalid operands. For example, in
+     Java:
+     #+BEGIN_SRC java
+       obj = null;
+       obj.method();    // NullPointerExceptions
+
+       int[] array = new int[5];
+       array[25] = 0;   // ArrayIndexOutOfBoundsException
+
+       num = 1/0;       // ArithmeticException 
+     #+END_SRC
+   - You call a method that throws (doesn't handle) an exception.
+** Throwing Exceptions
+   - Without a ~try-catch~ statement, exceptions immediately end a
+     method.
+   - This /should/ happen when that particular method is /not/
+     /responsible/ for resolving that issue.
+   - Say you have a chain of method calls:
+     #+BEGIN_SRC java
+       public void a() { b(); ... }
+       public void b() { c(); ... }
+       public void c() { int i = 1/0; ... }
+     #+END_SRC
+     - c() triggers an ArithmeticException.
+     - c() throws the exception to it's caller, b(), which throws it
+       to its caller, a(), which throws to it's caller.
+     - When each method receives the exception, it immediately ends.
+     - The rest of the code in c(), b(), and a() is skipped over.
+   - An exception is thrown up the call tree until one method
+     "catches" (handles) it.
+** Declaring Thrown Exceptions
+   - In Java (but not Python or C++), you must state what types of
+     exceptions your method might throw.
+     #+BEGIN_SRC java
+       public void myMethod() throws MyExceptionType // Can be comma-separated list
+       {
+           if(...)
+           {
+               throw new MyExceptionType("Some message");
+           }
+       }
+     #+END_SRC
+   - This is part of the method's signature, along with it's
+     parameters and return type.
+     - If you override the method in a subclass, it cannot throw any
+       extra exception types.
+   - This applies to "normal" exceptions, but there are special
+     cases...
+** Exception Hierarchy
+   - In Java (and Python), there are Exceptions and "Errors".
+     - Errors include OutOfMemoryError, LinkageError, AssertionError
+       and others.
+     - Errors are often unresolvable - a bug, or a VM-level problem.
+   - Java also has "Runtime Exceptions".
+     - These include NullPointerException, ArithmeticException, etc.
+     - Often these indicate a bug, which you can't usually handle;
+       other times user errors, which you can.
+   - Since you often can't handle them, you don't need to declare
+     Errors or RuntimeExceptions.
+   - However, they all essentially work the same way.
+** Catching Exceptions
+   - One method must be responsible for resolving an exception.
+   - It uses a try-catch statement:
+     #+BEGIN_SRC java
+       try {
+           // Do something that may produce an exception.
+
+           // Then (if needed) do something else that
+           // assumes no exception has occured.
+       }
+       catch(MyException e) {
+           // Handle a particular kind of exception.
+       }
+       catch(MyOtherException e) {
+           // Handle a different kind of exception.
+       }
+     #+END_SRC
+     (1 or more catch blocks are permitted.)
+   - If an exception occurs, the rest of the ~try~ block is skipped.
+     - This is why the ~try~ block should also contain any code that
+       assumes no exception has occurred.
+   - If the exception type matches one of the ~catch~ blocks, that
+     block is executed.
+     - Each ~catch~ block handles one type of exception only.
+   - Inside the ~catch~ block, you can examine the exception object.
+     #+BEGIN_SRC java
+       try {...}
+       catch(MyException e) // e is the exception object
+       {
+           System.out.println("Oops: " + e.getMessage());
+           ...
+       }
+     #+END_SRC
+   - If no ~catch~ block matches, the method ends as if there was no
+     ~try-catch~ at all.
+** Exceptions in C++
+   - To generate an exception (notice the lack of ~new~):
+     #+BEGIN_SRC C++
+       throw MyExecptionType("Some message"); // C++
+     #+END_SRC
+   - To catch an exception (notice the & symbol):
+     #+BEGIN_SRC C++
+       try {
+           ... // Do something that might go wrong
+       }
+       catch(MyExceptionType& e) {
+           ... // Handle one type of exception
+       }
+       catch(MyOtherExceptionType& e) {
+           ... // Handle another type of exception
+       }
+     #+END_SRC
+   - Declaring exceptions thrown is _broken in C++_.
+     - You can do it, but it's practically useless.
+** How to Handle Exceptions
+   - What exactly should you do inside a ~catch~ block?
+   - Depends on the situation and the type of exception.
+   - Can you try the same thing again?
+     - If the exception was caused by faulty input, perhaps you can
+       ask the user again. (e.g. ~try-catch~ inside a loop).
+   - Do you have a backup plan?
+     - Perhaps you failed to read a data file, but there are hardcoded
+       default values you can use instead.
+   - Were you trying to do something "nice but not essential"?
+     - Maybe you can get away without it.
+   - Is it a localised problem in one feature of the software?
+     - Keep the program running. Report the failure to the user.
+   - Is it catastrophic error that throws everything into disarray?
+     - Save the user's data! (And explain what happened.)
+** Exceptions and Responsibilities
+   - Throwing exceptions is part of a method's "contract" with the
+     calling method.
+     - If a method can throw an exception, that must be documented.
+     - If you call that method, you must handle the exception.
+     - In Java, exception throwing is part of a method's signature,
+       like the parameter list.
+   - Don't throw confusing exception types.
+     - Each method has it's own area of responsibility.
+     - Any exceptions it throws should reflect that responsibility.
+   - Often you need to ~catch~ one exception type and re-~throw~ a
+     different one.
+     - The original exception may not reflect the method's purpose,
+       and may be confusing for a calling method to deal with.
+** Catching and Rethrowing Exceptions (Example)
+   - Consider a method for displaying an image.
+     - As an implementation detail, it reads an image data from a
+       file.
+     - File I/O can trigger an ~IOException~.
+     - If this happens, the method must throw an exception - it has no
+       sensible way to fix the problem.
+     - /However/, the calling code /should not know/ about the file IO
+       (separation of concerns).
+   - The solution: ~catch~ the ~IOException~, and re-~throw~ a
+     GraphicsException (for instance).
+     #+BEGIN_SRC java
+       public void drawImage(...) throws GraphicsException
+       {
+           try { ... /* IOException may happen here. */ }
+           catch(IOException e) {
+               throw new GraphicsException("Bad img file", e)
+           }
+       } // GraphicsException is more meaningful
+     #+END_SRC
+** Catching and Rethrowing Exceptions (Discussion)
+   In previous example:
+   - We made up GraphicsException - see next section.
+   - We wrote ~new GraphicsException("Bad img file", e);~
+     - e is the original IOException.
+     - We're saying that e is the "cause" of the GraphicsException.
+     - This is important for debugging. A stack trace will now show
+       the whole history of both exceptions.
+   - Code that calls Graphics.drawImage() now only has to deal with
+     GraphicsException.
+     - Simplifies the usage of that method, particularly if a
+       GraphicsException can occur for /other/ reasons too.
+     - Helps achieve separation of concerns.
+** Defining Exception Types
+   - If GraphicsException doesn't exist, we can create it:
+     #+BEGIN_SRC java
+       public class GraphicsException extends Exception
+       {
+           public GraphicsException(String message, Throwable cause)
+           {
+               super(message, cause);
+           }
+       } // That's the entire class!
+     #+END_SRC
+   - The constructor takes an existing exception and sets it as the
+     "cause" of this new exception.
+   - In Java, you may also have constructors that omit the message,
+     the cause, or both.
+** Defining Exception Types: Python and C++
+   - Python makes it trivial:
+     #+BEGIN_SRC python
+       class GraphicsException(Exception):
+           pass
+     #+END_SRC
+     - "~pass~" does absolutely nothing. It's only needed because,
+       syntactically, you can't have an empty block in Python.
+     - The constructor ~__init__()~ is inherited, so you don't need to
+       write another one.
+   - In C++:
+     #+BEGIN_SRC C++
+       #include <stdexcept>
+
+       class GraphicsException: public std::exception
+       {
+           ...
+       }
+     #+END_SRC
+** Final Actions
+   - Often you need to guarantee certain "clean up" actions.
+     - Saving data, closing files, closing GUI windows, etc.
+     #+BEGIN_SRC java
+       try { // A try-finally statement
+           ...
+       }
+       finally {
+           // This code *always* runs.
+           ...
+       }
+       // This code runs only if there was no exception.
+     #+END_SRC
+   - The ~finally~ block runs after the ~try~ block, /regardless/ of
+     whether an exception has occurred.
+     - And not just exceptions, but ~return~, ~break~ and ~continue~
+       too.
+** Finally in Python and C++
+   - In Python:
+     #+BEGIN_SRC python
+       try:
+           ... # Somethin that might go wrong
+       finally:
+           ... # This code always runs.
+     #+END_SRC
+   - C++ has no "try-finally" statement.
+   - You can achieve a similar effect using destructors.
+     - Declare/construct an object on the stack.
+     - When the function ends, it's destructor is guaranteed to be
+       called.
