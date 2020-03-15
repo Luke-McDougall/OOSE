@@ -2,50 +2,27 @@ package addressbook.view;
 
 import java.io.*;
 import java.util.*;
-import view.LoadDataException;
+import addressbook.model.*;
+import addressbook.controller.*;
 
 /**
  * A simple address book application.
- * @author Dave and ...
+ * @author Dave and Luke McDougall
  */
-public class AddressBookApp 
+public class AddressBookUI 
 {
     /** Used to obtain user input. */
     private static Scanner input = new Scanner(System.in);
     private HashMap<Integer, Option> options;
     private AddressBook address_book;
     
-    public static void main(String[] args)
-    {
-        String fileName, entryName;
-        
-        System.out.print("Enter address book filename: ");
-        fileName = input.nextLine();
-        AddressBookApp app = new AddressBookApp();
-        
-        try
-        {
-            app.readAddressBook(fileName);
-            
-            // Initialize options map
-            app.add_option(1, new SearchByName(app.get_address_book()));
-            app.add_option(2, new SearchByEmail(app.get_address_book()));
-            app.add_option(3, new DisplayAll(app.get_address_book()));
-
-            app.showMenu();
-        }
-        catch(IOException e)
-        {
-            System.out.println("Could not read from " + fileName + ": " + e.getMessage());
-        }
-    }
-
-    public AddressBookApp()
+    public AddressBookUI()
     {
         options = new HashMap<Integer, Option>();
-        addressBook = null;
+        address_book = null;
     }
 
+    // Initialises address_book
     public void load_address_book() throws LoadDataException
     {
         String file_name;
@@ -74,12 +51,13 @@ public class AddressBookApp
 
     public void add_option(int key, Option opt)
     {
+        opt.set_address_book(this.address_book);
         options.put(key, opt);
     }
 
     public AddressBook get_address_book()
     {
-        return addressBook;
+        return address_book;
     }
     
     /**
@@ -88,7 +66,7 @@ public class AddressBookApp
      *
      * @param addressBook The AddressBook object to search.
      */
-    private void showMenu()
+    public void show_menu()
     {
         boolean done = false;
         while(!done)
