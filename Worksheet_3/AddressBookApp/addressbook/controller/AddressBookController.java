@@ -6,7 +6,6 @@ public class AddressBookController
 {
     public static void run()
     {
-        // TODO: Put some call to view here to get filename
         AddressBookUI ui = new AddressBookUI();
 
         try
