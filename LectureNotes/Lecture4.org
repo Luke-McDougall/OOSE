@@ -1,0 +1,395 @@
+#+TITLE: Lecture 4: Object Relationships
+* Objects
+  - One class can have many instances (objects).
+    - A simple but very important concept!
+  - These objects can form complex structures among
+    themselves. Consider this:
+    #+BEGIN_SRC java
+      public class Person
+      {
+          private Set<Person> friends;
+          ...
+      }
+    #+END_SRC
+  - The corresponding class diagram looks trivial: Person → Person
+  - But the /object/ structures could be very complex.
+    - Imagine 100 Person objects, each with 10 friends.
+** UML Object Diagrams
+   - We'll use /Object Diagrams/ to represent object structure.
+     - Rather, /examples/ of object structure, since the actual
+       objects are created at runtime.
+   - Say a Department has several Employees.
+   - We could have the following object structure:
+     - Department
+       - title = R&D
+       - budget = 300,000
+     - Employee
+       - name = Ralph
+       - dateOfBirth = 1990-01-10
+       - id = 24680
+       - salary = 60,000
+     - Employee
+       - name = Sam
+       - dateOfBirth = 1992-05-17
+       - id = 12345
+       - salary = 50,000
+     - Employee
+       - name = Lauren
+       - dateOfBirth = 1985-09-12
+       - id = 36925
+       - salary = 70,000
+   - Each object is represented like this:
+     - object name : class name
+       - field1 = value1
+       - field2 = value2
+     - The object name is often not really needed.
+   - Objects associate and/or aggregate with other objects.
+     - But only one-to-one - no multiplicity.
+     - There is only /one/ of each object.
+   - Objects /do not/ inherit from other objects.
+     #+BEGIN_SRC java
+       public class Employee extends Person { ... }
+
+       emp = new Employee(...);
+     #+END_SRC
+     - Inheritance occurs between classes, not objects.
+     - Only /one object/ here (emp), with properties of both classes.
+* Copying and Wrapping
+** Recap: Aggregation vs Association
+   - Aggregation
+     - A "while-part" relationship between two objects.
+     - One object owns the other.
+     - The owning ("whole") object has a field referring to the "part"
+       object.
+     - =ClassA= ◇→ =ClassB=
+   - Association (or "acquaintance"):
+     - The two objects involved are equals. Neither one is the "whole"
+       or "part".
+     - As a result, associations can be circular (e.g. A refers to B,
+       B refers to C, and C refers to A).
+     - =ClassA= → =ClassB=
+** Accessing an Object
+   #+BEGIN_SRC java
+     public class ShoppingCart
+     {
+         private ClassB field;
+         ...
+         public classB getField()
+         {
+             return field;              // This?
+             return new ClassB(field);  // Or this?
+         }
+     }
+   #+END_SRC
+   - How should you implement the above accessor?
+   - /Both/ approaches are valid in different situations.
+   - Depends on strength of the relationship between ClassA and ClassB.
+** Accessing an Object: Your Options
+   - How should you give access to an object field?
+     1. /Don't!/ (if you don't need to.)
+     2. /Or/ return a *reference*:
+        #+BEGIN_SRC java
+          public Point getCentre() { return centrePoint; }
+        #+END_SRC
+     3. /Or/ return a *const reference* (C++ only):
+        #+BEGIN_SRC C++
+          const Point& Circle::getCentre() const {...}  // C++
+        #+END_SRC
+     4. /Or/ return a *copy*:
+        #+BEGIN_SRC java
+          public Point getCentre()
+          {
+              return centrePoint.clone();
+          }
+        #+END_SRC
+     5. /Or/ return a *read-only wrapper*:
+        #+BEGIN_SRC java
+          public ReadOnlyPoint getCentre()
+          {
+              return new ReadOnlyPoint(centrePoint);
+          }
+        #+END_SRC
+** How do you Copy and Object?
+   - The copy constructor?
+     #+BEGIN_SRC java
+       TheClass copy = new TheClass(original);
+     #+END_SRC
+   - Problem: you must know the exact class.
+     - What if the original is a /subtype/ of TheClass?
+     - This kills inheritance (just like raw objects).
+   - Solution: an overridable clone() method:
+     #+BEGIN_SRC java
+       TheClass copy = original.clone();
+     #+END_SRC
+     - This will handle subclasses.
+     - Each subclass overrides clone() to return a copy of itself.
+     - So, we can make a copy without knowing the exact class.
+** How do you Wrap an Object?
+   - Consider this:
+     #+BEGIN_SRC java
+       public class ReadOnlyPoint  // Wrapper class
+       {
+           private Point p;
+           public ReadOnlyPoint(Point p) { this.p = p; }
+           public int getX() { return p.getX(); }
+           public int getY() { return p.getY(); }
+       } // No mutators
+     #+END_SRC
+   - ReadOnlyPoint "wraps around" a Point.
+   - You can access a Point, but not modify it.
+     - Point may have setters, but there's no way to call them given a
+       ReadOnlyPoint.
+   - An alternative to making a copy of the Point. Why?
+     - Copying can be slow, for objects that use lots of memory (not
+       so much Point, but other cases).
+** Wrapping Containers
+   - In Java, you can get a read-only view of a list, set or map:
+     #+BEGIN_SRC java
+       List<Thing> listView =
+           Collections.unmodifiableList(myList);
+     #+END_SRC
+     - (See the Collections class javadocs for more details.)
+** When Not to Copy/Wrap Objects
+   - Aggregation and association are not always so protected.
+     - In Java, the LinkedList class does not copy/wrap objects for
+       you.
+     - In most languages, container structures don't copy things.
+     - (C++ does, when you pass objects by value, it then doesn't have
+       a choice.)
+   - Often the aggregation/association is /supposed/ to be publicly
+     accessible.
+   - Associations would be impossible to set up if accessors always
+     returned copies.
+*** Don't Copy/Wrap Immutable Objects
+    - Immutable objects pose no risk to encapsulation.
+    - It is totally unnecessary to copy/wrap them.
+*** That Said...
+    - /Do copy/wrap/ an object when it's:
+      - Mutable, /and/
+      - Part of the internal workings of another class
+    - Usually applies to generic classes storing dates, addresses,
+      etc. (if mutable).
+    - Usually applies to containers:
+      #+BEGIN_SRC java
+        public class ShoppingCart
+        {
+            private Set<Product> products;
+            public Set<Product> getProducts()
+            {
+                return Collections.unmodifiableSet(products);
+            }
+        } // *Don't* return 'products' directly.
+      #+END_SRC
+    - The products set is part of the internal workings of
+      ShoppingCart.
+* Communication
+** Object Communication
+   - How do two objects communicate? Method calls.
+     #+BEGIN_SRC java
+       public class ClassA
+       {
+           private ClassB field;
+
+           public void methodOne()
+           {
+               int argument, value;
+               ...
+               value = field.methodTwo(argument);
+               ...
+           }
+       } // Spot the *two* communicating objects!
+     #+END_SRC
+** Intermediate Objects
+   - Say object 1 wants to communicate with object 2.
+   - Say they must exchange complex information.
+   - You might do this using object 3. e.g.
+     #+BEGIN_SRC java
+       s = new Search();
+       s.setSearchName("Bob");
+       s.setSearchEmail("@gmail.com");
+       s.setCaseSensitivity(false);
+       s.setPartialMatch(true);
+
+       entry = addressBook.search(s);
+     #+END_SRC
+     - AddressBok can search by name, email, other fields, or a
+       /combination/ thereof. It can be case sensitive (or not), and
+       partial (or complete).
+     - Just one search() method will do - not hundreds.
+     - We can pass complex information using a Search object.
+** Traversal of Objects
+   - Given objA, how do you obtain the value
+   - Beyond the choice of path, there are two ideas:
+     1. Retrieve a reference to each intermediate object, using it to
+        get to the next one. e.g.
+        #+BEGIN_SRC java
+          value = objA.getB().getD().getF().getValue();
+        #+END_SRC
+     2. Have the intermediate objects find the value themselves:
+        #+BEGIN_SRC java
+          value = objA.getValue();
+        #+END_SRC
+        (With similar code appearing inside classA - ClassE.)
+** Law (or Suggestion) of Demeter
+   - The "Law of Demeter" (LoD) is more advice than law.
+     - Named for the "Demeter Project".
+   - LoD says that objects should only communicate if they are
+     directly aggregated/associated.
+     - Avoid chains of accessor calls (as in previous section).
+     - Avoids coupling between distant classes.
+   - However, there is a tradeoff:
+     - Intermediate classes can become very cluttered.
+     - They can have many methods that simply delegate to another
+       object.
+   - Always consider the LoD, but don't follow it blindly.
+* Decorator Pattern
+  - Use recursive aggregation.
+  - Create a linked list of objects
+    - /Not/ for storing a sequence of data.
+    - For providing a set of add-on functionality.
+  - Used to avoid an unmanageable explosion of subclasses.
+    - What if there are many /independent/ ways to extend a class?
+    - You'd need a subclass for every possible combination!
+    - Or you could have one /decoration/ class for each individual
+      feature.
+** Rationale
+   - Say you're writing a role-playing computer game.
+   - The player starts with a character from one of 10 "races":
+     - Each race interacts with the game differently.
+     - You write a GameCharacter class, and a subclass for each race.
+   - As the game progresses, the player's character can acquire other
+     special abilities and characteristics.
+     - Stealth, healing powers, temporary invincibility,
+       super-strength, etc.
+   - How would you implement these? Two naive options:
+     - You could put all this extra functionality in the GameCharacter
+       superclass.
+     - You could have extra subclasses.
+   - What's wrong with everything-in-the-superclass?
+     - You end up with huge a class, with many separate
+       responsibilities.
+     - Difficult to maintain.
+   - What's wrong with extra subclasses?
+     - Consider the special abilities again: stealth, healing powers,
+       temporary invincibility, super-strength, etc.
+     - A character could acquire several of these abilities at once.
+     - 10 races and 4 independent special abilities requires 160 (10 ×
+       2⁴) subclasses. That doubles for each additional ability.
+     - Those classes are highly redundant
+   - What's the alternative?
+     - Have 14 subclasses of GameCharacter.
+     - 10 for the races, and 4 for the special abilities.
+     - The race classes will be self-sufficient.
+     - The ability classes will be add-ons that wrap around an
+       existing GameCharacter object.
+** Object Structure
+   :Context → :Decoration → :Decoration → :Decoration →
+   :Implementation
+   - The Decoration objects form a linked list.
+   - At the end, there is an object with a basic level of functionality
+   - Each decoration object:
+     - "Impersonates" the end object, by implementing the same
+       interface.
+     - Passes on method calls to the next object.
+     - Makes certain tweaks with these method calls happen.
+** Game Example
+   :GameEngine → :Stealth → :SuperStrength → :ElfCharacter[health =
+   75] 
+   
+   :GameEngind → :Healing → :HumanCharacter[health = 60]
+   - In our game, we'll have several implementation classes:
+     ~HumanCharacter, ElfCharacter, etc~
+   - They'll have these methods:
+     - attack() returns the strength (int) of a character's attack.
+     - defend() takes an int and reduces the character's health.
+     - setHealth() and getHealth().
+   - Stealth, SuperStrength and Healing have them too:
+     - SuperStrength.attack() returns "next.attack() * 2"
+       - (Doubles the damage dealt to another character.)
+     - Stealth.defend(x) calls "next.defend(x / 2)".
+       - (Halves the damage received by this character)
+     - Healing.attack(x) doesn't alter the attack, but increases
+       /this/ character's health at the same time.
+     - Here's the common interface for both base implementations /and
+       decorators/.
+     - (The Decorator Pattern only works because we can pretend that a
+       decoration /is/ a GameCharacter, in this case.)
+       #+BEGIN_SRC java
+         public interface GameCharacter
+         {
+             int attack();
+             void defend(int damage);
+             void setHealth(int health);
+             int getHealth();
+         }
+
+         public class ElfCharacter implements GameCharacter
+         {
+             private int health = 100;
+             public ElfCharacter() {}
+
+             @Override public int attack() { return 10; }
+             @Override public void defend(int damage)
+             {
+                 health -= damage;
+                 if(health <= 0) {...}
+             }
+    
+             @Override public void setHealth(int health) {...}
+             @Override public int getHealth() {...}
+         }
+       #+END_SRC
+     - Each base implementation would do this a bit differently.
+     - We could also have a common superclass /just/ for the base
+       implementations.
+       #+BEGIN_SRC java
+         public abstract class Ability implements GameCharacter
+         {    // Decoration superclass
+             protected GameCharacter next;
+             public Ability(GameCharacter next) { this.next = next; }
+
+             @Override public int attack() { return next.attack(); }
+
+             @Override public void defend(int damage)
+             {
+                 next.defend(damage);
+             }
+             @Override public void setHealth(int health)
+             {
+                 next.setHealth(health);
+             }
+             @Override public int getHealth()
+             {
+                 return next.getHealth();
+             }
+         }   // Every method here just passes on to "next".
+       #+END_SRC
+     - The decoration superclass delegates everything.
+     - The decoration /subclasses/ can then re-override certain
+       methods and change the behaviour.
+       #+BEGIN_SRC java
+         public class Stealth extends Ability
+         {
+             public Stealth(GameCharacter next)
+             {
+                 super(next);
+             }
+
+             @Override
+             public void defend(int damage)  // When defending, reduce damage by half
+             {
+                 next.defend(damage / 2);
+             }
+         }
+       #+END_SRC
+** Java IO
+   - Java's IO streams are based on the decorator pattern.
+   - :Context → :BufferdInputStream → :CheckedInputStream →
+     :FileInputStream
+   - Here, an instance of FileInputStream is the data source.
+   - The other objects are /decorating/ it, adding functionality.
+   - Each of their classes implement the InputStream interface.
+   - So, they can all be mixed and matched:
+     - FileInputStream could be replaced with ByteArrayInputStream.
+     - The others could be replaced, or re-ordered, or added to.
+* Composite Pattern
