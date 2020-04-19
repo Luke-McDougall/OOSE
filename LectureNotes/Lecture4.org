@@ -393,3 +393,221 @@
      - FileInputStream could be replaced with ByteArrayInputStream.
      - The others could be replaced, or re-ordered, or added to.
 * Composite Pattern
+  - /Also/ uses recursive aggregation.
+  - Creates a complex hierarchy of objects; i.e. a tree.
+    - /Not/ for writing efficient algorithms.
+    - For representing complex concepts.
+  - Used in various situations; e.g.:
+    - Reading/processing HTML and XML documents.
+    - Creating a graphical user interface.
+    - Parsing source code (e.g. compilers and related tools).
+  - Sometimes a fixed set of aggregation relationships isn't flexible
+    enough.
+  - (This is not related to the UML "composition" notation.)
+** Example: HTML "Document Object Model"
+   - Ever looked at HTML? It's hierarchical!
+   - HTML tags ("elements") divide up the text ("character data") into
+     hierarchical sections. e.g.
+     #+begin_src html
+       <html>
+         <head>
+           <title>The Web Page</title>
+         </head>
+         <body>
+           <h1>The Main Heading</h1>
+           <p>A paragraph with <em>emphasis</em>.</p>
+           <u1>
+             <li>A list item.</li>
+             <li>Another list item.</li>
+           </u1>
+         </body>
+       </html>
+     #+end_src
+** HTML as Objects
+   - When parsed, HTML is represented as a hierarchy of objects.
+     - (This is called the Document Object Model (DOM).)
+   - Notice that Element objects contain both Element and
+     CharacterData objects.
+:Element [tagName = BODY]
+ → :Element [tagName = H1] → :CharacterData [data = The Main Heading]
+ → :Element [tagName = P] → :CharacterData [data = ...]
+ → :Element [tagName = UL]
+    → :Element [tagName = LI] → :CharacterData [data = ...]
+    → :Element [tagName = LI] → :CharacterData [data = ...]
+** Composite Representation
+   - The Composite Pattern represents a tree of objects.
+   - An /arbitrary/ tree - any size and shape.
+     - An HTML document could be empty.
+     - Or it could have 1,000,000 tags inside a tree structure 1,000
+       levels deep.
+     - We want the /same class structure/ to handle all cases!
+   - Define two concrete classes:
+     - A "leaf-node" class (call it something relevant).
+     - A "composite-node" class.
+   - /And/ a common interface (or abstract superclass).
+     - This allows us to treat the leaf and composite nodes in the
+       same way.
+   - The composite-node class aggregates its own superclass.
+     - This allows composite nodes to have child nodes.
+     - Child nodes themselves can be /either/ type.
+** HTML as Classes
+   - In our HTML example:
+   - Our concrete classes:
+     - CharacterData represents a segment of actual text.
+     - Element represents a pair of tags (e.g. <p> ... </p>).
+   - And the relationships?
+     - Each Element can contain both text and other Elements.
+     - Therefore, Element aggregates Node, which can be either.
+     - 1..* multiplicity, since elements can own /many/ nodes.
+** Example 2: Graphical User Interface
+   - GUIs are also broken up hierarchically.
+:Window [title = The Application]
+ → :Menu []
+    → :Menu [name = File]
+       → :Option [name = Open]
+       → :Option [name = Save]
+    → :Menu [name = Edit]
+ → :Panel []
+    → :Panel []
+       → :List []
+       → :Viewer []
+    → :Panel
+       → :TextInput []
+** Example 3: Directory Hierarchies
+:Directory [name = /]
+ → :Directory [name = bin]
+    → :File [name = ls]
+ → :Directory [name = etc]
+    → :File [name = hosts]
+ → :Directory [name = home]
+ → :Directory [name = usr]
+    → :Directory [name = bin]
+       → :File [name = vim]
+    → :Directory [name = lib]
+       → :File [name = libc.so]
+    → :Directory [name = share]
+ → :Directory [name = lib]
+ → :Directory [name = var]
+    → :Directory [name = log]
+       → :File [name = messages]
+** Composite Operations
+   - Composite structures are designed to perform operations on
+     themselves; e.g.:
+     - Find and return a particular node.
+     - Calculate a result based on all the nodes.
+   - These happen recursively, in a node-by-node fashion.
+     - Each node processes itself.
+     - Leaf nodes typically just return a simple value.
+   - Composite nodes also need accessors/mutators for their children:
+     - getChildren(), addChild(), removeChild(), etc.
+     - When you need to modify the tree:
+       - You execute a "find" operation to retrieve one of the
+         composite nodes.
+       - (Or maybe you also have your composite nodes in a Map.)
+       - You call addChild(), etc. on the composite node.
+*** Example
+    - We can represent files and directories like this:
+      - MyFileManager
+      - <<interface>> Entry [+find(name): FileEntry, +countSize():
+        int]
+      - FileEntry [- name, - size, + find(name): FileEntry, +
+        countSize(): int]
+      - Directory [+ find(name): FileEntry, + countSize(): int,
+        addEntry(e: Entry), + removeEntry(e: Entry), + getEntries():
+        Entry[0..*]]
+    - We have two operations:
+      - Finding a file within the directory structure.
+      - Counting the total number of bytes used.
+    - These are implemented by both FileEntry and Directory.
+    - No surprises in the interface/supercalss itself.
+      #+begin_src java
+        public interface Entry
+        {
+            FileEntry(String name);
+            int countSize();
+        }
+      #+end_src
+    - However, these will be called from /two places/:
+      - The context (MyFileManager) in this case.
+      - The composite class (Directory).
+        #+begin_src java
+          public class FileEntry implements Entry
+          {
+              private String name;
+              private int size;
+              ...
+              @Override public FileEntry find(String name)
+              {
+                  FileEntry found = null;
+                  if(this.name.equals(name)) { found = this; }
+                  return found; // Returns itself if the name matches.
+              }                 // Returns null if not.
+
+              @Override public int countSize()
+              {
+                  return size;
+              }
+          }
+
+          public class Directory implements Entry
+          {
+              private List<Entry> children;
+              ...
+              @Override public FileEntry find(String name)
+              {
+                  for(Entry child : children)
+                  {
+                      FileEntry found = child.find(name); // Recurse
+                      if(found != null) return found;
+                  }
+                  return null;
+              }
+
+              @Override public int countSize()
+              {
+                  int size = 0;
+                  for(Entry child : children)
+                  {
+                      size += child.countSize(); // Recurse
+                  }
+                  return size;
+              }
+          }
+        #+end_src
+      - Our find() implementation may be a bit naive.
+        - Notice the code above only finds /files/.
+        - Notice it only finds /one/ file.
+        - What if we want to find /entries/ - either a file or a
+          directory?
+        - What if we want to find /all/ matching entries at once?
+** Composite Variations
+   - So far we've only described the simplest version of the Composite
+     Pattern.
+   - There are many possible variations.
+   - You could have multiple leaf node classes, and/or multiple
+     composite node classes.
+   - Leaf/composite nodes could have a whole other inheritance
+     hierarchy beneath them.
+   - You can have /decorator/ nodes too
+     - An extra composite-like node that only has one child.
+   - The superclass could contain a template method.
+     - With abstract hook methods.
+     - The hook method implementation in the composite class would
+       (probably) recursively call the template method on its child
+       nodes.
+** Decorator, Composite and MVC
+   - Decorator and Composite combine representations with operations.
+     - Really, this is just an expression of OO philosophy. /But.../
+     - Do they belong in the model?
+       - Because they represent things.
+     - Or in the controller?
+       - Because they perform operations.
+     - Or the view?
+       - GUIs typically use the Composite Pattern.
+   - There are no rules, only better or worse choices for the
+     situation at hand.
+     - i.e. it depends what the decorator/composite is /for/!
+   - However, given the choice between the following...
+     1. Model classes performing (simple) operations on themselves.
+     2. Controller classes acting as a kind of model.
+   - The first one makes a lot more sense!
